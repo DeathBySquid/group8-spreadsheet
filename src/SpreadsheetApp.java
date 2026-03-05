@@ -5,6 +5,11 @@
  * @author Donald Chinn
  */
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Stack;
+
 public class SpreadsheetApp {
     
     /**
@@ -41,9 +46,9 @@ public class SpreadsheetApp {
     
         System.out.println("Enter the cell: ");
         inputString = readString();
-        getCellToken(inputString, 0, cellToken);
+        SpreadsheetUtils.getCellToken(inputString, 0, cellToken);
     
-        System.out.println(printCellToken(cellID));
+        System.out.println(cellToken);
         System.out.println(": ");
     
         if ((cellToken.getRow() < 0) ||
@@ -68,29 +73,26 @@ public class SpreadsheetApp {
     private static void menuChangeCellFormula(Spreadsheet theSpreadsheet) {
         String inputCell;
         String inputFormula;
-        CellToken cellToken;
-        Stack expTreeTokenStack;
+        CellToken cellToken = new CellToken();
+        Stack<Token> expTreeTokenStack;
         // ExpressionTreeToken expTreeToken;
     
         System.out.println("Enter the cell to change: ");
         inputCell = readString();
-        theSpreadsheet.getCellToken (inputCell, 0, cellToken);
+        SpreadsheetUtils.getCellToken(inputCell, 0, cellToken);
     
         // error check to make sure the row and column
         // are within spreadsheet array bounds.
-        if ((cellToken.getRow() < 0) ||
-            (cellToken.getRow() >= theSpreadsheet.getNumRows()) ||
-            (cellToken.getColumn() < 0) ||
-            (cellToken.getColumn() >= theSpreadsheet.getNumColumns()) ) {
-            
+        if ((cellToken.getRow() < 0) || (cellToken.getRow() >= theSpreadsheet.getNumRows()) || (cellToken.getColumn() < 0) || (cellToken.getColumn() >= theSpreadsheet.getNumColumns()) ) {
+
             System.out.println("Bad cell.");
             return;
         }
-    
+
         System.out.println("Enter the cell's new formula: ");
         inputFormula = readString();
-        expTreeTokenStack = getFormula(inputFormula);
-    
+        expTreeTokenStack = SpreadsheetUtils.getFormula(inputFormula);
+
         /*
         // This code prints out the expression stack from
         // top to bottom (that is, reverse of postfix).
@@ -100,15 +102,15 @@ public class SpreadsheetApp {
             printExpressionTreeToken(expTreeToken);
         }
         */
-    
-        theSpreadsheet.changeCellFormulaAndRecalculate(cellToken, expTreeTokenStack);
+
+        theSpreadsheet.changeCellFormulaAndRecalculate(cellToken, inputFormula, expTreeTokenStack);
         System.out.println();
     }
     
     public static void main(String[] args) {
         Spreadsheet theSpreadsheet = new Spreadsheet(8);
 
-        bool done = false;
+        boolean done = false;
         String command = "";
     
         System.out.println(">>> Welcome to the TCSS 342 Spreadsheet <<<");

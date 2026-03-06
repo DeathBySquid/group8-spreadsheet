@@ -20,6 +20,7 @@ public class TopologicalSort {
     private Spreadsheet mySpreadsheet;
     private DependencyGraph myDependencyGraph;
     private HashMap<Cell, Integer> myEvaluateState;
+    private HashMap<Cell, Integer> myOldCells;    // Holds the old cell values
     private boolean myCycleDetected;
     
     /**
@@ -46,6 +47,8 @@ public class TopologicalSort {
         Set<Cell> allCells = myDependencyGraph.getAllCells();
         for (Cell cell : allCells) {
             myEvaluateState.put(cell, unevalutedCell);
+            // Holds old cell values in-case there is a cycle.
+            myOldCells.put(cell, cell.getValue());   
         }
         
         myCycleDetected = false;
@@ -107,6 +110,18 @@ public class TopologicalSort {
                     // Push unevaluated dependency onto stack
                     stack.push(dependency);
                 }
+            }
+        }
+    }
+    
+    /**
+     * Reverts the evaluations made to the cells.
+     * Should be called when there is a cycle.
+     */
+    public void revertToOldCells() {
+        if (myOldCells != null) {
+            for (Cell cell : myOldCells.keySet()) {
+                cell.setValue(myOldCells.get(cell));
             }
         }
     }

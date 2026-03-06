@@ -42,7 +42,7 @@ public class TopologicalSort {
      * @return true if the sort was successful (no cycles), false if a cycle was found
      */
     public boolean topsort() {
-        // Initializing all cells as unvisited
+        // Initializing all cells as unevaluated
         Set<Cell> allCells = myDependencyGraph.getAllCells();
         for (Cell cell : allCells) {
             myEvaluateState.put(cell, unevalutedCell);
@@ -50,7 +50,7 @@ public class TopologicalSort {
         
         myCycleDetected = false;
         
-        // Performs a DFS on all unvisited cells
+        // Performs a DFS on all unevaluated cells
         for (Cell cell : allCells) {
             if (myEvaluateState.get(cell) == unevalutedCell && !myCycleDetected) {
                 dfs(cell);
@@ -64,7 +64,7 @@ public class TopologicalSort {
      * Depth-First Search to evaluate cells and find cycles using an iterative stack-based approach.
      * Uses post-order traversal: visit all dependencies first, then evaluate the cell.
      * 
-     * @param startingCell - the cell to visit
+     * @param startingCell - the cell to evaluate
      */
     private void dfs(Cell startingCell) {
         Stack<Cell> stack = new Stack<>();
@@ -88,10 +88,10 @@ public class TopologicalSort {
                 continue;
             }
             
-            // Mark as visiting to detect cycles
+            // Mark as evaluating to detect cycles
             myEvaluateState.put(cell, evaluatingCell);
             
-            // Visit all cells that this cell depends on (incoming dependencies)
+            // Evaluate all cells that this cell depends on (incoming dependencies)
             Set<Cell> dependencies = myDependencyGraph.getDependencies(cell);
             for (Cell dependency : dependencies) {
                 int depState = myEvaluateState.getOrDefault(dependency, unevalutedCell);

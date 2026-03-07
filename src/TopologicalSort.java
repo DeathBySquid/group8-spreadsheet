@@ -117,7 +117,7 @@ public class TopologicalSort {
      * Reverts the evaluations made to the cells.
      * Should be called when there is a cycle.
      */
-    public void revertToOldCells() {
+    private void revertToOldCells() {
         if (myOldCellsValue != null) {
             for (Cell cell : myOldCellsValue.keySet()) {
                 cell.setValue(myOldCellsValue.get(cell));

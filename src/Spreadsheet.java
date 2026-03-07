@@ -20,10 +20,19 @@ import java.util.Stack;
  * @version Winter 2026
  */
 public class Spreadsheet {
+
+    public static final int ROWS = 8;
+    public static final int COLUMNS = 8;
+
     private Cell[][] cells;
     private DependencyGraph graph = new DependencyGraph();
 
-
+    /**
+     * Constructs a new spreadsheet using the default rows and columns
+     */
+    public Spreadsheet(){
+        this(ROWS);
+    }
     /**
      * Constructs a new square spreadsheet of the given size.
      * Each cell is initialized with default formula "0" and value 0.
@@ -180,5 +189,51 @@ public class Spreadsheet {
             }
         }
         return refs;
+    }
+
+    /**
+     * Returns the formula stored in the cell at the given column and row.
+     * Bridge method for the GUI
+     *
+     * @param col column index
+     * @param row row index
+     * @return the formula string
+     */
+    public String getFormula(int row, int col) {
+        return cells[row][col].getFormula();
+    }
+
+    /**
+     * Returns the computed value of the cell at a given column and row
+     * Bridge method for the GUI
+     * @param col column index
+     * @param row row index
+     * @return the integer value
+     */
+    public int getValue(int row, int col) {
+        return cells[row][col].getValue();
+    }
+
+    /**
+     * Parses the formula string, builds the expression tree, updates the
+     * dependency graph and recalculates all affected cells.
+     * Bridge method for the GUI.
+     *
+     * @param col column index
+     * @param row row index
+     * @param formula the formula string
+     */
+    public void changeCell(int row, int col, String formula) {
+        // build a CellToken for this cell
+        CellToken token = new CellToken();
+        token.setRow(row);
+        token.setColumn(col);
+
+        // parse the formula string into a postfix token stack
+        Stack<Token> postfix = new Stack<>();
+        SpreadsheetUtils.getFormula(formula);
+
+        // update and recalculate
+        changeCellFormulaAndRecalculate(token, formula, postfix);
     }
 }

@@ -39,6 +39,10 @@ public final class SpreadsheetGUI extends JFrame {
      * to stop the TableModeListener from working during refresh table
      */
     private boolean isRefreshing = false;
+    /**
+     * Cache to preserve cell values between refreshes
+     */
+    private String [][] cellCache = new String[ROWS][COLS];
 
     /**
      * the number of rows in the spreadsheet
@@ -49,7 +53,7 @@ public final class SpreadsheetGUI extends JFrame {
      * the number of columns in the spreadsheet
      * set up in the backend
      */
-    private static final int COLS = Spreadsheet.COLS;
+    private static final int COLS = Spreadsheet.COLUMNS;
 
     /**
      * Constructor to display the spreadsheetGUI
@@ -87,6 +91,14 @@ public final class SpreadsheetGUI extends JFrame {
     private void createMenuBar() {
         // Create a menu bar that attaches to the JFrame
         JMenuBar menuBar = new JMenuBar();
+        // create a clickable button to create a new spreadsheet
+        JMenu newMenu = new JMenu("New ");
+        newMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                newSpreadsheet();
+            }
+        });
         // create the file dropdown menu
         JMenu fileMenu = new JMenu("File");
         // the menu items for file
@@ -104,6 +116,8 @@ public final class SpreadsheetGUI extends JFrame {
         fileMenu.addSeparator();
         // add exit to file menu
         fileMenu.add(exitItem);
+        //add  new spreadsheet button
+        menuBar.add(newMenu);
         // add file menu to menu bar
         menuBar.add(fileMenu);
         // attach menu bar to the JFrame
@@ -130,7 +144,7 @@ public final class SpreadsheetGUI extends JFrame {
                 for (int row = 0; row < ROWS; row++) {
                     for (int col = 0; col < COLS; col++) {
                         // get the formula string for this cell from the backend
-                        String formula = spreadsheet.getFormula(col, row);
+                        String formula = spreadsheet.getFormula(row, col);
                         // only save the cells with a formula. Empty cells default to zero no need to save them
                         if (formula != null && !formula.isEmpty()) {
                             // convert the column number back to letter
@@ -188,9 +202,7 @@ public final class SpreadsheetGUI extends JFrame {
                     //and updates the dependency graph
                     spreadsheet.changeCell(col, row, formula);
                 }
-                // after all formulas are loaded, run topological sort and evaluate every cell
-                // in the correct dependency order.
-                spreadsheet.evaluateAll();
+
                 // push all newly computed values to the visual grid
                 refreshTable();
                 // load was successful
@@ -202,7 +214,43 @@ public final class SpreadsheetGUI extends JFrame {
             }
         }
     }
+    /**
+     * Clears the current spreadsheet and resets everything to blank
+     */
+    private void newSpreadsheet() {
+        // ask the user to confirm before wiping the current data
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to create a new spreadsheet? \nAll " +
+                        "unsaved changes will be lost.", "New Spreadsheet",
+                JOptionPane.YES_NO_OPTION
+        );
+        // if the user clicks No do nothing
+        if (confirm != JOptionPane.YES_OPTION)
+            return;
 
+        // reset to a fresh spreadsheet
+        spreadsheet = new Spreadsheet();
+
+        // clear the local cache
+        cellCache = new String[ROWS][COLS];
+
+        // reset the visual grid
+        isRefreshing = true;
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 1; col <= COLS; col++) {
+                tableModel.setValueAt("", row, col);
+            }
+        }
+        isRefreshing = false;
+
+        // reset the formula bar and cell label back to default
+        formulaBar.setText("");
+        cellLabel.setText("A1");
+
+        // clear the cell selection
+        table.clearSelection();
+    }
     /**
      * Creates the formula bar panel displayed at the top of the window
      *
@@ -266,15 +314,15 @@ public final class SpreadsheetGUI extends JFrame {
         for (int row = 0; row < ROWS; row++) {
             data[row][0] = String.valueOf(row + 1);
             for (int col = 1; col <= COLS; col++) {
-                data[row][col] = "";// all cells start empty
+                data[row][col] = "";
             }
         }
         // create a table model then override isCellEditable so row labels cannot be edited.
         tableModel = new DefaultTableModel(data, columnHeaders) {
             @Override
             public boolean isCellEditable(int row, int col) {
-                // only block the row number column and column header row
-                return col != 0;
+                //  block the row number column
+                return col != 0 ;
             }
         };
 
@@ -285,6 +333,7 @@ public final class SpreadsheetGUI extends JFrame {
         // makes grid lines visible
         table.setShowGrid(true);
         table.setGridColor(Color.BLACK);
+
         // set colour for row label column to separate it from the rest of the grid
         table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -359,8 +408,19 @@ public final class SpreadsheetGUI extends JFrame {
 
             // send the value to the backend so it isn't lost on refresh
             if (!typed.isEmpty()) {
-                spreadsheet.changeCell(col, row, typed);
-                spreadsheet.evaluateAll();
+                // save to cache so that refresh does not wipe it
+                cellCache[row][col] = typed;
+                spreadsheet.changeCell(col, row , typed);
+                refreshTable();
+
+                String formula = spreadsheet.getFormula(col, row );
+                formulaBar.setText(formula == null || formula.equals("0") ? "" : formula);
+            } else {
+                // cell was cleared reset to zero
+                cellCache[row][col] = null;
+                spreadsheet.changeCell(col, row, "0");
+                formulaBar.setText("");
+                refreshTable();
             }
 
         });
@@ -388,7 +448,12 @@ public final class SpreadsheetGUI extends JFrame {
 
         // get the formula from your backend and show it in the formula bar
         String formula = spreadsheet.getFormula(rowCol, row);
-        formulaBar.setText(formula);
+        // show empty if the cell is empty or zero, otherwise show the formula
+        if(formula == null || formula.isEmpty() || formula.equals("0")) {
+            formulaBar.setText("");
+        } else {
+            formulaBar.setText(formula);
+        }
     }
 
     /**
@@ -409,15 +474,17 @@ public final class SpreadsheetGUI extends JFrame {
         String formula = formulaBar.getText().trim();
 
         // if the formula bar is empty, do nothing
-        if (formula.isEmpty())
+        if (formula.isEmpty()) {
+            cellCache[row][col] = null;
+            spreadsheet.changeCell(rowCol, row, "0");
+            refreshTable();
             return;
+        }
+        // save formula to local cache
+        cellCache[row][rowCol] = formula;
 
         // send formula to your backend spreadsheet
         spreadsheet.changeCell(rowCol, row, formula);
-
-        // recalculate everything
-        // runs topological sort + evaluation
-        spreadsheet.evaluateAll();
 
         // refresh the visual table to show new values
         refreshTable();
@@ -435,17 +502,20 @@ public final class SpreadsheetGUI extends JFrame {
                 // get the cells computed integer value from the backend
                 int value = spreadsheet.getValue(col, row);
                 String formula = spreadsheet.getFormula(col, row);
+                // get cached value for this cell
+                String cached = cellCache[row][col];
 
-                // col+1 because column 0 is the row number label
+                // row+1 because row 0 is the header now
                 if (value != 0) {
-                    // show the computed value as a string in the table cell(if it is non-zero)
-                    tableModel.setValueAt(String.valueOf(value), row, col + 1);
-                } else if (formula != null && !formula.isEmpty()) {
-                    // show the formula text if there is no computed value yet
-                    tableModel.setValueAt(formula, row, col + 1);
-                } else {
-                    // show blank for 0
+                    tableModel.setValueAt(String.valueOf(value), row , col + 1);
+                } else if (formula == null || formula.isEmpty() || formula.equals("0")) {
+                    // formula evaluates to zero
                     tableModel.setValueAt("", row, col + 1);
+                } else if (cached != null && !cached.isEmpty()) {
+                    tableModel.setValueAt(cached, row, col + 1);
+                } else {
+                    // empty cell
+                    tableModel.setValueAt("", row , col + 1);
                 }
             }
         }

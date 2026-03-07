@@ -27,12 +27,13 @@ public class TopologicalSort {
      * Constructs a TopologicalSort object with references to the spreadsheet and dependency graph.
      * 
      * @param theSpreadsheet - the Spreadsheet object containing all cells
-     * @param dependencyGraph - the DependencyGraph showing cell dependencies
+     * @param theDependencyGraph - the DependencyGraph showing cell dependencies
      */
     public TopologicalSort(Spreadsheet theSpreadsheet, DependencyGraph theDependencyGraph) {
         mySpreadsheet = theSpreadsheet;
         myDependencyGraph = theDependencyGraph;
         myEvaluateState = new HashMap<>();
+        myOldCellsValue = new HashMap<>();
         myCycleDetected = false;
     }
     

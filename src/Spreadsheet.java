@@ -237,4 +237,3 @@ public class Spreadsheet {
         changeCellFormulaAndRecalculate(token, formula, postfix);
     }
 }
-

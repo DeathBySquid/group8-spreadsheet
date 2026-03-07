@@ -5,6 +5,7 @@
  * @author Donald Chinn
  */
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -108,74 +109,77 @@ public class SpreadsheetApp {
     }
     
     public static void main(String[] args) {
-        Spreadsheet theSpreadsheet = new Spreadsheet(8);
 
-        boolean done = false;
-        String command = "";
-    
-        System.out.println(">>> Welcome to the TCSS 342 Spreadsheet <<<");
-        System.out.println();
-        System.out.println();
-    
-        while (!done) {
-            System.out.println("Choose from the following commands:");
-            System.out.println();
-            System.out.println("p: print out the values in the spreadsheet");
-            System.out.println("f: print out a cell's formula");
-            System.out.println("a: print all cell formulas");
-            System.out.println("c: change the formula of a cell");
-    /* BONUS
-            System.out.println("r: read in a spreadsheet from a textfile");
-            System.out.println("s: save the spreadsheet to a textfile");
-     */
-            System.out.println();
-            System.out.println("q: quit");
-    
-            System.out.println();
-            System.out.println("Enter your command: ");
-            command = readString();
-    
-            // We care only about the first character of the string
-            switch (command.charAt(0)) {
-                case 'p':
-                    menuPrintValues(theSpreadsheet);
-                    break;
-        
-                case 'f':
-                    menuPrintCellFormula(theSpreadsheet);
-                    break;
-        
-                case 'a':
-                    menuPrintAllFormulas(theSpreadsheet);
-                    break;
-        
-                case 'c':
-                    menuChangeCellFormula(theSpreadsheet);
-                    break;
-        
-                    /* BONUS:
-                case 'r':
-                    menuReadSpreadsheet(theSpreadsheet);
-                    break;
-        
-                case 's':
-                    menuSaveSpreadsheet(theSpreadsheet);
-                    break;
-                    */
-        
-                case 'q':
-                    done = true;
-                    break;
-        
-                default:
-                    System.out.println(command.charAt(0) + ": Bad command.");
-                    break;
-            }
-            System.out.println();
-    
-        }
-    
-        System.out.println("Thank you for using our spreadsheet.");
+        SwingUtilities.invokeLater(() -> new SpreadsheetGUI());
+
+//        Spreadsheet theSpreadsheet = new Spreadsheet(8);
+//
+//        boolean done = false;
+//        String command = "";
+//
+//        System.out.println(">>> Welcome to the TCSS 342 Spreadsheet <<<");
+//        System.out.println();
+//        System.out.println();
+//
+//        while (!done) {
+//            System.out.println("Choose from the following commands:");
+//            System.out.println();
+//            System.out.println("p: print out the values in the spreadsheet");
+//            System.out.println("f: print out a cell's formula");
+//            System.out.println("a: print all cell formulas");
+//            System.out.println("c: change the formula of a cell");
+//    /* BONUS
+//            System.out.println("r: read in a spreadsheet from a textfile");
+//            System.out.println("s: save the spreadsheet to a textfile");
+//     */
+//            System.out.println();
+//            System.out.println("q: quit");
+//
+//            System.out.println();
+//            System.out.println("Enter your command: ");
+//            command = readString();
+//
+//            // We care only about the first character of the string
+//            switch (command.charAt(0)) {
+//                case 'p':
+//                    menuPrintValues(theSpreadsheet);
+//                    break;
+//
+//                case 'f':
+//                    menuPrintCellFormula(theSpreadsheet);
+//                    break;
+//
+//                case 'a':
+//                    menuPrintAllFormulas(theSpreadsheet);
+//                    break;
+//
+//                case 'c':
+//                    menuChangeCellFormula(theSpreadsheet);
+//                    break;
+//
+//                    /* BONUS:
+//                case 'r':
+//                    menuReadSpreadsheet(theSpreadsheet);
+//                    break;
+//
+//                case 's':
+//                    menuSaveSpreadsheet(theSpreadsheet);
+//                    break;
+//                    */
+//
+//                case 'q':
+//                    done = true;
+//                    break;
+//
+//                default:
+//                    System.out.println(command.charAt(0) + ": Bad command.");
+//                    break;
+//            }
+//            System.out.println();
+//
+//        }
+//
+//        System.out.println("Thank you for using our spreadsheet.");
     }
 
 }

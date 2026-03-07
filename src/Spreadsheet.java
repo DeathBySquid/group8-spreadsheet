@@ -125,7 +125,7 @@ public class Spreadsheet {
         boolean isSorted = sort.topsort();
 
         if (!isSorted) {
-            sort.revertToOldCells();
+            
         }
     }
 
@@ -182,3 +182,4 @@ public class Spreadsheet {
         return refs;
     }
 }
+

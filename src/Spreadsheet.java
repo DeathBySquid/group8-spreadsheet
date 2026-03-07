@@ -135,10 +135,11 @@ public class Spreadsheet {
         String oldFormula = cell.getFormula();
         ExpressionTree oldTree = cell.getExpressionTreeCopy();
         Set<Cell> oldDeps = graph.getDependencies(cell);
+        Stack<Token> postfixCopy = (Stack<Token>) postfix.clone();
 
         cell.setFormula(formula);
         cell.buildExpressionTree(postfix);
-        List<Cell> refs = extractReferences(postfix);
+        List<Cell> refs = extractReferences(postfixCopy);
 
         graph.clearDependencies(cell);
         for (Cell ref : refs) {

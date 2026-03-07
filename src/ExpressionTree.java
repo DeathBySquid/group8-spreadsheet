@@ -48,6 +48,8 @@ public class ExpressionTree {
      * The stack should have the postfix expression with the first token
      * of the postfix at the BOTTOM and the last at the TOP.
      *
+     * Note: param s will be empty after building expression tree.
+     *
      * @param s - a Stack of Token objects representing a postfix expression
      */
     public void buildExpressionTree(Stack<Token> s) {

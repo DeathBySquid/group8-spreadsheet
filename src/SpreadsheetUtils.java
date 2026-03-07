@@ -160,9 +160,15 @@ public class SpreadsheetUtils {
             }
         }
 
-        // successfully parsed a cell reference
+        // convert spreadsheet row (1-based) to internal row (0-based)
+        if (row <= 0) {
+            cellToken.setColumn(CellToken.BadCell);
+            cellToken.setRow(CellToken.BadCell);
+            return index;
+        }
+
         cellToken.setColumn(column);
-        cellToken.setRow(row);
+        cellToken.setRow(row - 1);
         return index;
     }
 

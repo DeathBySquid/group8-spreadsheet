@@ -3,10 +3,10 @@ import java.util.Stack;
 /**
  * An expression tree built from a postfix stack of Tokens.
  * Used to represent and evaluate a cell's formula.
- *
+ * <p>
  * The tree is a binary tree (NOT a binary search tree).
  * Operator nodes have two children. Literal/cell nodes are leaves.
- *
+ * <p>
  * Example: formula "5 + B3 * 8" becomes postfix "5 B3 8 * +"
  * and produces:
  *        +
@@ -89,6 +89,41 @@ public class ExpressionTree {
         // Should never reach here
         System.out.println("Error in getExpressionTree: unknown token type.");
         return null;
+    }
+
+    /**
+     * Creates and returns a copy of this ExpressionTree.
+     * <p>
+     * The returned tree has the same structure and tokens as the original,
+     * but consists of entirely new ExpressionTreeNode objects. This allows
+     * the spreadsheet to save the tree before modification and restore it
+     * later without risk of shared references.
+     *
+     * @return a new ExpressionTree that is a structural copy of this tree
+     */
+    public ExpressionTree copyExpressionTree() {
+        ExpressionTree copy = new ExpressionTree();
+        copy.root = copyExpressionTreeNode(this.root);
+        return copy;
+    }
+
+    /**
+     * Recursively creates a copy of the given ExpressionTreeNode.
+     * <p>
+     * Tokens are reused because they are immutable, but new node objects
+     * are created for the left and right subtrees. This ensures that the
+     * copied ExpressionTree is fully independent of the original.
+     *
+     * @param node the node to copy
+     * @return a deep copy of the node, or null if the node is null
+     */
+    private ExpressionTreeNode copyExpressionTreeNode(ExpressionTreeNode node) {
+        if (node == null) return null;
+        return new ExpressionTreeNode(
+                node.token,
+                copyExpressionTreeNode(node.left),
+                copyExpressionTreeNode(node.right)
+        );
     }
 
     /**

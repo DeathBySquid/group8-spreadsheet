@@ -200,7 +200,7 @@ public final class SpreadsheetGUI extends JFrame {
 
                     //send the formula to the backend it parses the formula builds an expression tree
                     //and updates the dependency graph
-                    spreadsheet.changeCell(col, row, formula);
+                    spreadsheet.changeCell(row, col, formula);
                 }
 
                 // push all newly computed values to the visual grid
@@ -410,7 +410,7 @@ public final class SpreadsheetGUI extends JFrame {
             if (!typed.isEmpty()) {
                 // save to cache so that refresh does not wipe it
                 cellCache[row][col] = typed;
-                spreadsheet.changeCell(col, row , typed);
+                spreadsheet.changeCell(row, col , typed);
                 refreshTable();
 
                 String formula = spreadsheet.getFormula(col, row );
@@ -418,7 +418,7 @@ public final class SpreadsheetGUI extends JFrame {
             } else {
                 // cell was cleared reset to zero
                 cellCache[row][col] = null;
-                spreadsheet.changeCell(col, row, "0");
+                spreadsheet.changeCell(row, col, "0");
                 formulaBar.setText("");
                 refreshTable();
             }
@@ -447,7 +447,7 @@ public final class SpreadsheetGUI extends JFrame {
         cellLabel.setText(cellName);
 
         // get the formula from your backend and show it in the formula bar
-        String formula = spreadsheet.getFormula(rowCol, row);
+        String formula = spreadsheet.getFormula(row, rowCol);
         // show empty if the cell is empty or zero, otherwise show the formula
         if(formula == null || formula.isEmpty() || formula.equals("0")) {
             formulaBar.setText("");
@@ -476,7 +476,7 @@ public final class SpreadsheetGUI extends JFrame {
         // if the formula bar is empty, do nothing
         if (formula.isEmpty()) {
             cellCache[row][col] = null;
-            spreadsheet.changeCell(rowCol, row, "0");
+            spreadsheet.changeCell(row, rowCol, "0");
             refreshTable();
             return;
         }
@@ -484,7 +484,7 @@ public final class SpreadsheetGUI extends JFrame {
         cellCache[row][rowCol] = formula;
 
         // send formula to your backend spreadsheet
-        spreadsheet.changeCell(rowCol, row, formula);
+        spreadsheet.changeCell(row, rowCol, formula);
 
         // refresh the visual table to show new values
         refreshTable();
@@ -500,8 +500,8 @@ public final class SpreadsheetGUI extends JFrame {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 // get the cells computed integer value from the backend
-                int value = spreadsheet.getValue(col, row);
-                String formula = spreadsheet.getFormula(col, row);
+                int value = spreadsheet.getValue(row, col);
+                String formula = spreadsheet.getFormula(row, col);
                 // get cached value for this cell
                 String cached = cellCache[row][col];
 

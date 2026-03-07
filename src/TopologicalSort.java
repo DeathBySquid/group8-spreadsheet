@@ -113,7 +113,6 @@ public class TopologicalSort {
             }
         }
     }
-
     /**
      * Reverts the evaluations made to the cells.
      * Should be called when there is a cycle.

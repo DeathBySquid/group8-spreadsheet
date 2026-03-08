@@ -11,6 +11,7 @@ public class OperatorToken extends Token {
     public static final char Minus = '-';
     public static final char Mult = '*';
     public static final char Div = '/';
+    public static final char Exp = '^'; // BONUS: exponentiation operator
     public static final char LeftParen = '(';
 
     private final char operatorToken;
@@ -36,6 +37,7 @@ public class OperatorToken extends Token {
      * +, -  -> 0
      * *, /  -> 1
      * (     -> 2
+     * ^     -> 3
      * @return the priority
      */
     public int priority() {
@@ -44,8 +46,10 @@ public class OperatorToken extends Token {
                 return 0;
             case Mult, Div:
                 return 1;
-            case LeftParen:
+            case Exp:     // BONUS: exponentiation operator
                 return 2;
+            case LeftParen:
+                return 3;
             default:
                 System.out.println("Error in OperatorToken priority().");
                 System.exit(0);

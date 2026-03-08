@@ -137,7 +137,7 @@ public class ExpressionTree {
      * @param spreadsheet - the Spreadsheet used to look up cell values
      * @return the integer result of evaluating this expression
      */
-    public int evaluate(Spreadsheet spreadsheet) {
+    public double evaluate(Spreadsheet spreadsheet) {
         return evaluateNode(root, spreadsheet);
     }
 
@@ -148,7 +148,7 @@ public class ExpressionTree {
      * @param spreadsheet - the Spreadsheet used to look up cell values
      * @return the integer result
      */
-    private int evaluateNode(ExpressionTreeNode node, Spreadsheet spreadsheet) {
+    private double evaluateNode(ExpressionTreeNode node, Spreadsheet spreadsheet) {
         if (node == null) {
             return 0;
         }
@@ -166,8 +166,8 @@ public class ExpressionTree {
 
         } else if (token instanceof OperatorToken) {
             // Recursive case: evaluate both subtrees then apply the operator
-            int leftValue  = evaluateNode(node.left,  spreadsheet);
-            int rightValue = evaluateNode(node.right, spreadsheet);
+            double leftValue  = evaluateNode(node.left,  spreadsheet);
+            double rightValue = evaluateNode(node.right, spreadsheet);
 
             switch (((OperatorToken) token).getOperatorToken()) {
                 case OperatorToken.Plus:
@@ -182,6 +182,8 @@ public class ExpressionTree {
                         return 0;
                     }
                     return leftValue / rightValue;
+                case OperatorToken.Exp:               // BONUS: exponentiation operator
+                    return Math.pow(leftValue,  rightValue);
                 default:
                     System.out.println("Error in evaluateNode: unknown operator.");
                     return 0;
@@ -218,7 +220,7 @@ public class ExpressionTree {
         Token token = node.token;
 
         if (token instanceof LiteralToken) {
-            return String.valueOf(((LiteralToken) token).getValue());
+            return Spreadsheet.formatValue(((LiteralToken) token).getValue());
 
         } else if (token instanceof CellToken) {
             return token.toString();

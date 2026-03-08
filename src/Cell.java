@@ -13,7 +13,7 @@ import java.util.Stack;
 public class Cell {
 
     private String formula;
-    private int value;
+    private double value;
     private ExpressionTree expressionTree;
 
     /**
@@ -45,7 +45,7 @@ public class Cell {
      * Returns the most recently computed integer value of this cell.
      * @return the cell's value
      */
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 
@@ -53,7 +53,7 @@ public class Cell {
      * Sets the computed value of this cell directly.
      * @param value - the value to set
      */
-    public void setValue(int value) {
+    public void setValue(double value) {
         this.value = value;
     }
 

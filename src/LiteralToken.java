@@ -6,13 +6,13 @@
  */
 public class LiteralToken extends Token {
 
-    private final int value;
+    private final double value;
 
     /**
      * Constructs a LiteralToken with the given integer value.
      * @param value - the integer value of this token
      */
-    public LiteralToken(int value) {
+    public LiteralToken(double value) {
         this.value = value;
     }
 
@@ -20,12 +20,12 @@ public class LiteralToken extends Token {
      * Returns the integer value of this token.
      * @return the value
      */
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 
     @Override
     public String toString() {
-        return Integer.toString(value);
+        return Spreadsheet.formatValue(value);
     }
 }

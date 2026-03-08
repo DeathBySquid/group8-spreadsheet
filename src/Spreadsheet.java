@@ -84,7 +84,7 @@ public class Spreadsheet {
      * @param column - column index
      * @return the evaluated integer of the cell
      */
-    public int getCellValue(int row, int column) {
+    public double getCellValue(int row, int column) {
         return cells[row][column].getValue();
     }
 
@@ -166,9 +166,31 @@ public class Spreadsheet {
     public void printValues() {
         for (Cell[] cell : cells) {
             for (Cell value : cell) {
-                System.out.print(value.getValue());
+                System.out.print(formatValue(value.getValue()));
             }
         }
+    }
+
+    /**
+     * Formats a double cell value for display: shows up to 3 decimal places,
+     * but omits trailing zeros (e.g. 4.0 → "4", 0.714285... → "0.714").
+     *
+     * @param v - the value to format
+     * @return formatted string
+     */
+    public static String formatValue(double v) {
+        // Round to 3 decimal places using half-up rounding
+        double rounded = Math.round(v * 1000.0) / 1000.0;
+        // If the rounded value is a whole number, show it without any decimal point
+        long asLong = (long) rounded;
+        if (rounded == asLong) {
+            return String.valueOf(asLong);
+        }
+        // Otherwise format to exactly 3 decimal places, then erase following zeros
+        // e.g. 5.89662 -> "5.897", 1.500 -> "1.5", 0.71428... -> "0.714"
+        String s = String.format("%.3f", rounded);
+        s = s.replaceAll("0+$", "").replaceAll("\\.$", "");
+        return s;
     }
 
     /**
@@ -231,7 +253,7 @@ public class Spreadsheet {
      * @param row row index
      * @return the integer value
      */
-    public int getValue(int row, int col) {
+    public double getValue(int row, int col) {
         return cells[row][col].getValue();
     }
 
@@ -257,4 +279,3 @@ public class Spreadsheet {
         changeCellFormulaAndRecalculate(token, formula, postfix);
     }
 }
-

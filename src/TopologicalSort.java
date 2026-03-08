@@ -11,21 +11,21 @@ import java.util.Stack;
  * @version Winter 2026
  */
 public class TopologicalSort {
-    
+
     // Cell states for topsort
     private static final int unevaluatedCell = 0;
     private static final int evaluatingCell = 1;
     private static final int evaluatedCell = 2;
-    
+
     private final Spreadsheet mySpreadsheet;
     private final DependencyGraph myDependencyGraph;
     private final HashMap<Cell, Integer> myEvaluateState;
-    private final HashMap<Cell, Integer> myOldCells;    // Holds the old cell values
+    private final HashMap<Cell, Double> myOldCells;    // Holds the old cell values
     private boolean myCycleDetected;
-    
+
     /**
      * Constructs a TopologicalSort object with references to the spreadsheet and dependency graph.
-     * 
+     *
      * @param theSpreadsheet - the Spreadsheet object containing all cells
      * @param theDependencyGraph - the DependencyGraph showing cell dependencies
      */
@@ -36,11 +36,11 @@ public class TopologicalSort {
         myOldCells = new HashMap<>();
         myCycleDetected = false;
     }
-    
+
     /**
      * Performs a topological sort (DFS-based) on all cells in the spreadsheet.
      * Evaluates each cell after all its dependencies have been evaluated.
-     * 
+     *
      * @return true if the sort was successful (no cycles), false if a cycle was found
      */
     public boolean topsort() {
@@ -49,41 +49,41 @@ public class TopologicalSort {
         for (Cell cell : allCells) {
             myEvaluateState.put(cell, unevaluatedCell);
             // Holds old cell values in-case there is a cycle.
-            myOldCells.put(cell, cell.getValue());   
+            myOldCells.put(cell, cell.getValue());
         }
-        
+
         myCycleDetected = false;
-        
+
         // Performs a DFS on all unevaluated cells
         for (Cell cell : allCells) {
             if (myEvaluateState.get(cell) == unevaluatedCell && !myCycleDetected) {
                 dfs(cell);
             }
         }
-        
+
         return !myCycleDetected;
     }
-    
+
     /**
      * Depth-First Search to evaluate cells and find cycles using an iterative stack-based approach.
      * Uses post-order traversal: visit all dependencies first, then evaluate the cell.
-     * 
+     *
      * @param startingCell - the cell to evaluate
      */
     private void dfs(Cell startingCell) {
         Stack<Cell> stack = new Stack<>();
         stack.push(startingCell);
-        
+
         while (!stack.isEmpty() && !myCycleDetected) {
             Cell cell = stack.peek();
             int state = myEvaluateState.getOrDefault(cell, unevaluatedCell);
-            
+
             if (state == evaluatedCell) {
                 // Already evaluated
                 stack.pop();
                 continue;
             }
-            
+
             if (state == evaluatingCell) {
                 // Post-order
                 cell.evaluate(mySpreadsheet);
@@ -91,15 +91,15 @@ public class TopologicalSort {
                 stack.pop();
                 continue;
             }
-            
+
             // Mark as evaluating to detect cycles
             myEvaluateState.put(cell, evaluatingCell);
-            
+
             // Evaluate all cells that this cell depends on (incoming dependencies)
             Set<Cell> dependencies = myDependencyGraph.getDependencies(cell);
             for (Cell dependency : dependencies) {
                 int depState = myEvaluateState.getOrDefault(dependency, unevaluatedCell);
-                
+
                 if (depState == evaluatingCell) {
                     // Cycle found
                     System.out.println("Error: Cycle detected in dependency graph.");
@@ -107,7 +107,7 @@ public class TopologicalSort {
                     revertToOldCells();
                     return;
                 }
-                
+
                 if (depState == unevaluatedCell) {
                     // Push unevaluated dependency onto stack
                     stack.push(dependency);
@@ -115,7 +115,7 @@ public class TopologicalSort {
             }
         }
     }
-    
+
     /**
      * Reverts the evaluations made to the cells.
      * Should be called when there is a cycle.
@@ -125,10 +125,10 @@ public class TopologicalSort {
             cell.setValue(myOldCells.get(cell));
         }
     }
-    
+
     /**
      * Returns true if a cycle was found during the sort.
-     * 
+     *
      * @return true if a cycle exists, false otherwise
      */
     public boolean hasCycle() {

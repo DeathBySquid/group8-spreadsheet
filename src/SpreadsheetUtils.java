@@ -26,7 +26,7 @@ public class SpreadsheetUtils {
     }
 
     /**
-     * Returns true if ch is one of the supported operator characters: +, -, *, /, (
+     * Returns true if ch is one of the supported operator characters: +, -, *, /, ^, (
      * @param ch - character to check
      * @return true if ch is an operator
      */
@@ -35,6 +35,7 @@ public class SpreadsheetUtils {
                 ch == OperatorToken.Minus  ||
                 ch == OperatorToken.Mult   ||
                 ch == OperatorToken.Div    ||
+                ch == OperatorToken.Exp    || // BONUS: exponentiation operator
                 ch == OperatorToken.LeftParen);
     }
 
@@ -42,7 +43,8 @@ public class SpreadsheetUtils {
      * Returns the priority of an operator character.
      * +, - -> 0
      * *, / -> 1
-     * (    -> 2
+     * ^    -> 2
+     * (    -> 3
      * @param ch  an operator character
      * @return    the priority
      */
@@ -54,8 +56,10 @@ public class SpreadsheetUtils {
             case OperatorToken.Mult:
             case OperatorToken.Div:
                 return 1;
-            case OperatorToken.LeftParen:
+            case OperatorToken.Exp: // BONUS: exponentiation operator
                 return 2;
+            case OperatorToken.LeftParen:
+                return 3;
             default:
                 System.out.println("Error in operatorPriority: not an operator.");
                 System.exit(0);
@@ -104,8 +108,6 @@ public class SpreadsheetUtils {
             return index;
         }
 
-        // ASSERT: index now points to the first non-whitespace character
-
         ch = inputString.charAt(index);
 
         // must start with a capital letter
@@ -135,9 +137,6 @@ public class SpreadsheetUtils {
             cellToken.setRow(CellToken.BadCell);
             return index;
         }
-
-        // ASSERT: We have processed leading whitespace and the
-        // capital letters of the cell reference
 
         // read digits for the row number
         ch = inputString.charAt(index);
@@ -181,24 +180,24 @@ public class SpreadsheetUtils {
         char ch;
         String returnString = "";
         int col = cellToken.getColumn();
-        int largest = 26; // minimum col number with number_of_digits digits
-        int number_of_digits = 2;
+        int largest = 26;
+        int numberOfDigits = 2;
 
         // compute the biggest power of 26 <= col
         while (largest <= col) {
             largest *= 26;
-            number_of_digits++;
+            numberOfDigits++;
         }
         largest /= 26;
-        number_of_digits--;
+        numberOfDigits--;
 
         // append column letters, one character at a time
-        while (number_of_digits > 1) {
+        while (numberOfDigits > 1) {
             ch = (char) (((col / largest) - 1) + 'A');
             returnString += ch;
             col = col % largest;
             largest /= 26;
-            number_of_digits--;
+            numberOfDigits--;
         }
 
         // handle last digit
@@ -270,20 +269,30 @@ public class SpreadsheetUtils {
                 }
                 index++;
 
-            } else if (Character.isDigit(ch)) {
-                // Parse a multi-digit integer literal
-                int literalValue = ch - '0';
-                index++;
+            } else if (Character.isDigit(ch) || ch == '.') {
+                // Parse a numeric literal — supports integers and decimals (e.g. 42, 0.075, .5)
+                StringBuilder numStr = new StringBuilder();
+                boolean hasDot = false;
                 while (index < formula.length()) {
                     ch = formula.charAt(index);
                     if (Character.isDigit(ch)) {
-                        literalValue = (literalValue * 10) + (ch - '0');
+                        numStr.append(ch);
+                        index++;
+                    } else if (ch == '.' && !hasDot) {
+                        hasDot = true;
+                        numStr.append(ch);
                         index++;
                     } else {
                         break;
                     }
                 }
-                returnStack.push(new LiteralToken(literalValue));
+                try {
+                    double literalValue = Double.parseDouble(numStr.toString());
+                    returnStack.push(new LiteralToken(literalValue));
+                } catch (NumberFormatException e) {
+                    error = true;
+                    break;
+                }
 
             } else if (Character.isUpperCase(ch)) {
                 // Parse a cell reference

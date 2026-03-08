@@ -500,14 +500,14 @@ public final class SpreadsheetGUI extends JFrame {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
                 // get the cells computed integer value from the backend
-                int value = spreadsheet.getValue(row, col);
+                double value = spreadsheet.getValue(row, col);
                 String formula = spreadsheet.getFormula(row, col);
                 // get cached value for this cell
                 String cached = cellCache[row][col];
 
                 // row+1 because row 0 is the header now
                 if (value != 0) {
-                    tableModel.setValueAt(String.valueOf(value), row , col + 1);
+                    tableModel.setValueAt(Spreadsheet.formatValue(value), row , col + 1);
                 } else if (formula == null || formula.isEmpty() || formula.equals("0")) {
                     // formula evaluates to zero
                     tableModel.setValueAt("", row, col + 1);

@@ -6,8 +6,8 @@ import java.io.*;
 /**
  * SpreadsheetGUI is the graphical user interface for the spreadsheet application.
  * This class extends JFrame and serves as the front end of the program. It shows
- * a grid display od cells, a formula bar for entering and editing formulas and
- * a menubar with file operations; save and load.
+ * a grid display of cells with adjustable columns, a formula bar for entering and editing formulas and
+ * a menu bar with a new clickable button to create a new spreadsheet and file operations; save, load and exit.
  *
  * @author daniellabirungi
  * @version Winter 2026

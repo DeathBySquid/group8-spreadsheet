@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
@@ -103,6 +104,8 @@ public class TopologicalSort {
                 if (depState == evaluatingCell) {
                     // Cycle found
                     System.out.println("Error: Cycle detected in dependency graph.");
+                    JOptionPane.showMessageDialog(null, "Cycle detected in cell's formula." +
+                            "\nReverting Changes.");
                     myCycleDetected = true;
                     revertToOldCells();
                     return;

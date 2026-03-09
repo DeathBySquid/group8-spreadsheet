@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.Stack;
 
 /**
  * Performs topological sort on the cell dependency graph.
@@ -62,55 +61,47 @@ public class TopologicalSort {
     }
 
     /**
-     * Depth-First Search to evaluate cells and find cycles using an iterative stack-based approach.
+     * Depth-First Search to evaluate cells and find cycles using recursion.
      * Uses post-order traversal: visit all dependencies first, then evaluate the cell.
      *
-     * @param startingCell - the cell to evaluate
+     * @param cell - the cell to evaluate
      */
-    private void dfs(Cell startingCell) {
-        Stack<Cell> stack = new Stack<>();
-        stack.push(startingCell);
+    private void dfs(Cell cell) {
+        // If cycle already detected, stop processing
+        if (myCycleDetected) {
+            return;
+        }
 
-        while (!stack.isEmpty() && !myCycleDetected) {
-            Cell cell = stack.peek();
-            int state = myEvaluateState.getOrDefault(cell, unevaluatedCell);
+        int state = myEvaluateState.getOrDefault(cell, unevaluatedCell);
 
-            if (state == evaluatedCell) {
-                // Already evaluated
-                stack.pop();
-                continue;
-            }
+        // If already evaluated, nothing to do
+        if (state == evaluatedCell) {
+            return;
+        }
 
-            if (state == evaluatingCell) {
-                // Post-order
-                cell.evaluate(mySpreadsheet);
-                myEvaluateState.put(cell, evaluatedCell);
-                stack.pop();
-                continue;
-            }
+        // If currently evaluating, we found a cycle
+        if (state == evaluatingCell) {
+            JOptionPane.showMessageDialog(null, "Cycle detected in cell's formula." +
+                    "\nReverting Changes.");
+            myCycleDetected = true;
+            return;
+        }
 
-            // Mark as evaluating to detect cycles
-            myEvaluateState.put(cell, evaluatingCell);
+        // Mark as evaluating to detect cycles
+        myEvaluateState.put(cell, evaluatingCell);
 
-            // Evaluate all cells that this cell depends on (incoming dependencies)
-            Set<Cell> dependencies = myDependencyGraph.getDependencies(cell);
-            for (Cell dependency : dependencies) {
-                int depState = myEvaluateState.getOrDefault(dependency, unevaluatedCell);
-
-                if (depState == evaluatingCell) {
-                    // Cycle found
-                    JOptionPane.showMessageDialog(null, "Cycle detected in cell's formula." +
-                            "\nReverting Changes.");
-                    myCycleDetected = true;
-                    return;
-                }
-
-                if (depState == unevaluatedCell) {
-                    // Push unevaluated dependency onto stack
-                    stack.push(dependency);
-                }
+        // Recursively evaluate all cells that this cell depends on
+        Set<Cell> dependencies = myDependencyGraph.getDependencies(cell);
+        for (Cell dependency : dependencies) {
+            dfs(dependency);
+            if (myCycleDetected) {
+                return;
             }
         }
+
+        // Post-order
+        cell.evaluate(mySpreadsheet);
+        myEvaluateState.put(cell, evaluatedCell);
     }
 
 

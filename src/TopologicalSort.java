@@ -90,7 +90,7 @@ public class TopologicalSort {
         // Mark as evaluating to detect cycles
         myEvaluateState.put(cell, evaluatingCell);
 
-        // Recursively evaluate all cells that this cell depends on (incoming dependencies)
+        // Recursively evaluate all cells that this cell depends on
         Set<Cell> dependencies = myDependencyGraph.getDependencies(cell);
         for (Cell dependency : dependencies) {
             dfs(dependency);

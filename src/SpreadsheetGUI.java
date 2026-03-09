@@ -511,10 +511,10 @@ public final class SpreadsheetGUI extends JFrame {
         // sync cache to backend in case of a cycle caused a revert
         String backendFormula = spreadsheet.getFormula(row, rowCol);
         if (backendFormula == null || backendFormula.equals("0")) {
-            // cell was blank - clear the cache
+            // cell was blank - clear the cache.
             cellCache[row][col] = null;
         } else if(!backendFormula.equals(formula)) {
-            // cell had a previous value - restore the cache to that value
+            // cell had a previous value - restore the cache to that value.
             cellCache[row][col] = backendFormula;
         }
 

@@ -20,7 +20,7 @@ public class Cell {
      * Constructs a default Cell with formula "0" and value 0.
      */
     public Cell() {
-        this.formula = "0";
+        this.formula = "";
         this.value = 0;
         this.expressionTree = new ExpressionTree();
     }
